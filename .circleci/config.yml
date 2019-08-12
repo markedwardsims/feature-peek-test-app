@@ -1,17 +1,24 @@
-version: 2 # use CircleCI 2.0
-jobs: # a collection of steps
-  build: # runs not using Workflows must have a `build` job as entry point
-    working_directory: ~/mern-starter # directory where steps will run
-    docker: # run the steps with Docker
-      - image: circleci/node:8-browsers # ...with this image as the primary container; this is where all `steps` will run
-    steps: # a collection of executable commands
-      - checkout # special step to check out source code to working directory
+version: 2.0
+jobs:
+  build:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "yarn.lock" }}
+            - v1-dependencies-
       - run:
-          name: Update NPM
-          command: 'sudo npm install -g npm@latest'
+          name: Install dependencies
+          command: yarn
+      - save_cache:
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
       - run:
-          name: Install NPM
-          command: npm install
+          name: Build static assets
+          command: yarn build
       - run:
-          name: Build
-          command: npm run build
+          name: Ping FeaturePeek
+          command: bash <(curl -s https://peek.run/ci)
