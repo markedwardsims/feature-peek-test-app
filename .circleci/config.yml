@@ -6,6 +6,10 @@ jobs:
 
     steps:
       - run:
+          name: Test
+          command: npm run test
+          
+      - run:
           name: Build
-          command: ng build
+          command: npm run build
 
