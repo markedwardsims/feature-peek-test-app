@@ -1,15 +1,24 @@
-version: 1
+version: 2.0
 jobs:
   build:
     docker:
-      - image: circleci/node:4.8.2
-
+      - image: circleci/node:lts
     steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "yarn.lock" }}
+            - v1-dependencies-
       - run:
-          name: Test
-          command: npm run test
-          
+          name: Install dependencies
+          command: yarn
+      - save_cache:
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
       - run:
-          name: Build
-          command: npm run build
-
+          name: Build static assets
+          command: yarn build
+      - run:
+          name: Ping FeaturePeek
+          command: bash <(curl -s https://peek.run/ci)
